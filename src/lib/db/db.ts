@@ -7,6 +7,8 @@ export type Commitment_t = {
     name: string;
     date: string;
     movable: boolean;
+    repeats: "once" | "daily" | "weekly" | "bi-weekly"
+    time: string | null;
 }
 
 let __db_commitments: LsDb<Commitment_t> | undefined = undefined;

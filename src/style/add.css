@@ -1,0 +1,169 @@
+.add-commitment {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.add-commitment > form {
+    box-sizing: border-box;
+    max-width: 32rem;
+    margin-inline: auto;
+    padding: 12px 8px 24px;
+}
+
+.add-commitment fieldset {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.add-fields {
+    display: grid;
+    gap: 12px;
+}
+
+.add-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.add-field > span,
+.add-options > legend,
+.add-queue > h2 {
+    padding: 0;
+    color: var(--add-label-color, #555);
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.add-options > legend {
+    margin-bottom: 4px;
+}
+
+.add-type > legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+.add-options > label {
+    position: relative;
+}
+
+.add-options input {
+    position: absolute;
+    opacity: 0;
+}
+
+.add-options label > span {
+    display: grid;
+    place-items: center;
+    min-height: 40px;
+    padding-inline: 8px;
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.add-options input:checked + span {
+    background: var(--add-selected-bg, #d4d4d4);
+    font-weight: 700;
+}
+
+.add-options input:focus-visible + span {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.add-field {
+    display: grid;
+    gap: 4px;
+}
+
+.add-field input,
+.add-actions button {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    border: 2px solid currentColor;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
+
+.add-field input {
+    min-height: 44px;
+    padding: 6px 10px;
+}
+
+.add-queue {
+    margin-top: 12px;
+}
+
+.add-queue > h2 {
+    margin: 0 0 6px;
+}
+
+.add-queue > ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.add-queue li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-queue li > span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.add-queue li > button {
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.add-actions {
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.add-actions button {
+    min-height: 54px;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.add-actions button[type="submit"] {
+    min-height: 60px;
+    background: var(--add-submit-bg, #bdbdbd);
+    font-weight: 700;
+}
+
+.add-status {
+    margin: 8px 0 0;
+    font-size: 0.875rem;
+}
+
+.add-status:empty {
+    display: none;
+}

@@ -12,7 +12,7 @@ export class CommitmentPage extends Component {
 
         super(element);
         this.update = async() => {
-            this.placeholder.innerText = "Commitments page";
+
         }
 
         // placeholder

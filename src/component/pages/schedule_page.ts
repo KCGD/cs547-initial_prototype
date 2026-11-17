@@ -29,6 +29,7 @@ export class SchedulePage extends Component {
                 /**
                  * Commitments present, show weeks by weight
                  */
+                this.noCommitmentsScreen.hidden = true;
             }
         }
 
