@@ -46,7 +46,11 @@ mobile browsers.
 
 # Contribution
 **Benicio Hernandez**: App page transition implementation / database interaction / element management.
+
 **Kevin Doshi**: Styling / CSS, form design.
+
 **Tanmay Pawar**: Directed app flow / page transition.
+
 **Kieran Corson**: Designed UI Components, general layout.
+
 **Brayden Abo**: Testing / implementation feedback.
