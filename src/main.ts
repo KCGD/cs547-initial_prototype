@@ -9,6 +9,7 @@ import { MainComponent } from "./component/main_component";
 import { SchedulePage } from "./component/pages/schedule_page";
 import { CommitmentPage } from "./component/pages/commitments_page";
 import { AddPage } from "./component/pages/add_page";
+import { WeekViewPage } from "./component/pages/week_view";
 
 async function Main() {
 	const db = ensure_commitmentdb();
@@ -27,7 +28,10 @@ async function Main() {
 	const MAIN = new MainComponent(createChild(APP, "main"), {
 		"schedule": SchedulePage,
 		"commitments": CommitmentPage,
-		"add": AddPage
+		"add": AddPage,
+
+		// non-menu pages
+		"weekview": WeekViewPage
 	});
 
 	// create footer horizontal menu

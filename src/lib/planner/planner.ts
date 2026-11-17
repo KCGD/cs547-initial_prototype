@@ -4,7 +4,7 @@ export type Rated<T> = T & {
     rated: number;
 }
 
-type CommitmentWeek = {
+export type CommitmentWeek = {
     events: Commitment_t[];
 };
 
