@@ -169,7 +169,6 @@ function lsGetJSON(key:string): {[key:string]: any} {
  */
 export class LsDb<T extends Document> {
     private Documents:{[key:string]: Collection<T>};
-    private LastUpdated: number;
     private UniqueID: string = randomUUID(4);
     private collection: string;
     private locked: Boolean;
@@ -183,7 +182,6 @@ export class LsDb<T extends Document> {
 
         try {
             this.Documents = lsGetJSON(DBP.DOCUMENTS) as T;
-            this.LastUpdated = lsGetProperty(DBP.LAST_UPDATED, "number");
             this.locked = lsGetProperty(DBP.LOCKED, "boolean");
         } catch (e) {
             throw new Error(`Failed to instantiate on existing data: ${e}`);
@@ -268,9 +266,6 @@ export class LsDb<T extends Document> {
             // resync documents
             this.Documents = lsGetJSON(DBP.DOCUMENTS);
         };
-
-        // update last updated
-        this.LastUpdated = lsGetProperty(DBP.LAST_UPDATED, "number");
 
         return;
     }
@@ -456,7 +451,7 @@ export class LsDb<T extends Document> {
                             case "$delete": {
                                 // delete operation (remove property from doc)
                                 delete docs[i][update_prop];
-                            }
+                            } break;
 
                             default:
                                 // assign string

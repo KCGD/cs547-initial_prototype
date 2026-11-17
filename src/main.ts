@@ -4,7 +4,6 @@ import "./style/header.css"
 import { createChild } from "./lib/dom/domUtil";
 import { Header } from "./component/header";
 import { HozMenu, type HozMenuOptions } from "./component/hozmenu";
-import { ensure_commitmentdb } from "./lib/db/db";
 import { MainComponent } from "./component/main_component";
 import { SchedulePage } from "./component/pages/schedule_page";
 import { CommitmentPage } from "./component/pages/commitments_page";
@@ -12,8 +11,6 @@ import { AddPage } from "./component/pages/add_page";
 import { WeekViewPage } from "./component/pages/week_view";
 
 async function Main() {
-	const db = ensure_commitmentdb();
-
 	const APP = document.querySelector<HTMLDivElement>('#app');
 	if(!APP) {
 		alert('NO APP');

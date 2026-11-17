@@ -14,7 +14,6 @@ type HeaderOpts = {
 export class Header extends Component {
     private title:HTMLElement;
     private back:HTMLElement;
-    private clickHandler: (this: HTMLElement, ev: MouseEvent) => any | undefined;
     private parent: MainComponent;
     private backrefs: Array<string> = new Array();
     header = "header";
