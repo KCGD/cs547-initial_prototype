@@ -10,6 +10,7 @@ import { CommitmentPage } from "./component/pages/commitments_page";
 import { AddPage } from "./component/pages/add_page";
 import { WeekViewPage } from "./component/pages/week_view";
 import { Suggestions } from "./component/pages/suggestions";
+import { AdjustRating } from "./component/pages/adjust_rating";
 
 async function Main() {
 	const APP = document.querySelector<HTMLDivElement>('#app');
@@ -30,6 +31,7 @@ async function Main() {
 		// non-menu pages
 		"weekview": WeekViewPage,
 		"suggested": Suggestions,
+		"adjust_rating": AdjustRating
 	});
 
 	// create footer horizontal menu

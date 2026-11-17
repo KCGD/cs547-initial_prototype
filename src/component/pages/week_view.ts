@@ -1,4 +1,4 @@
-import { ensure_commitmentdb, type Commitment_t } from "../../lib/db/db";
+import { ensure_commitmentdb, ensure_overridedb, type Commitment_t } from "../../lib/db/db";
 import type { LsDb } from "../../lib/db/lsdb";
 import {
     create_week_rating,
@@ -9,7 +9,7 @@ import {
 import { Component } from "../component";
 import type { MainComponent } from "../main_component";
 
-import "../../style/week_view.css";
+import "../../style/week_view.css"
 
 export type WeekViewData = Rated<CommitmentWeek> & {
     label?: string;
@@ -32,7 +32,7 @@ const timeOfDay = new Intl.DateTimeFormat("en-US", {
     timeZone: "UTC",
 });
 
-function weekStart(week: WeekViewData): number | undefined {
+export function weekStart(week: WeekViewData): number | undefined {
     if (week.startDate) {
         const start = Date.parse(`${week.startDate}T00:00:00Z`);
         if (Number.isFinite(start)) return start;
@@ -47,6 +47,16 @@ function weekStart(week: WeekViewData): number | undefined {
     }
 }
 
+export async function dispatchPlannerUpdate(parent: MainComponent): Promise<void> {
+    const dispatcher = parent as MainComponent & {
+        dispatchUpdate?: () => unknown;
+        disbatchUpdate?: () => unknown;
+    };
+    const dispatch = dispatcher.dispatchUpdate ?? dispatcher.disbatchUpdate;
+    if (!dispatch) throw new Error("MainComponent has no update dispatcher");
+    await dispatch.call(parent);
+}
+
 function eventName(event: Commitment_t): string {
     if (!event.time) return event.name;
     const time = Date.parse(`2000-01-01T${event.time}:00Z`);
@@ -55,6 +65,7 @@ function eventName(event: Commitment_t): string {
 
 export class WeekViewPage extends Component {
     private db: LsDb<Commitment_t> = ensure_commitmentdb();
+    private overridedb = ensure_overridedb();
     header = "Week View";
 
     constructor(element: HTMLElement, parent: MainComponent) {
@@ -89,6 +100,7 @@ export class WeekViewPage extends Component {
         const changeRating = content.querySelector<HTMLButtonElement>(".week-view-rating-link")!;
 
         let currentWeek: WeekViewData | undefined;
+        let ratingOverride: number | undefined;
         let saving = false;
         let readRevision = 0;
 
@@ -121,7 +133,7 @@ export class WeekViewPage extends Component {
                     currentWeek = { ...currentWeek, events };
                     const start = weekStart(currentWeek);
 
-                    if (start !== undefined) {
+                    if (start !== undefined && ratingOverride === undefined) {
                         try {
                             const date = new Date(start).toISOString().slice(0, 10);
                             const updatedRating = create_week_rating(events, date)["Week 1"];
@@ -136,7 +148,7 @@ export class WeekViewPage extends Component {
                 }
 
                 try {
-                    await parent.disbatchUpdate();
+                    await dispatchPlannerUpdate(parent);
                 } catch (error) {
                     console.error("Could not refresh pages after saving commitment", error);
                     status.textContent = "Commitment saved. Other pages could not refresh.";
@@ -211,6 +223,7 @@ export class WeekViewPage extends Component {
             const request = ++readRevision;
             if (week) {
                 currentWeek = week;
+                ratingOverride = undefined;
                 status.textContent = "";
                 render();
             }
@@ -221,18 +234,22 @@ export class WeekViewPage extends Component {
             if (start === undefined) return;
 
             try {
-                const commitments = await this.db.find({});
+                const startDate = new Date(start).toISOString().slice(0, 10);
+                const [commitments, overrides] = await Promise.all([
+                    this.db.find({}),
+                    this.overridedb.find({ start_date: startDate }),
+                ]);
                 if (request !== readRevision) return;
 
                 const events = commitments.filter((event) => {
                     const date = Date.parse(`${event.date}T00:00:00Z`);
                     return date >= start && date < start + 7 * DAY_MS;
                 });
-                const startDate = new Date(start).toISOString().slice(0, 10);
-                const rated = events.length > 0
+                ratingOverride = overrides[overrides.length - 1]?.rating;
+                const estimate = events.length > 0
                     ? create_week_rating(events, startDate)["Week 1"]?.rated ?? selected.rated
                     : 0;
-                currentWeek = { ...selected, startDate, events, rated };
+                currentWeek = { ...selected, startDate, events, rated: ratingOverride ?? estimate };
                 render();
             } catch (error) {
                 if (request !== readRevision) return;
@@ -245,14 +262,14 @@ export class WeekViewPage extends Component {
             if (currentWeek && !saving) parent.setActive("suggested", currentWeek);
         });
         changeRating.addEventListener("click", () => {
-            window.alert("Rating adjustment will be available here.");
+            if (currentWeek && !saving) parent.setActive("adjust_rating", currentWeek);
         });
 
         this.element.appendChild(content);
     }
 
     private async saveMovable(id: string, movable: boolean): Promise<void> {
-        const result: unknown = await this.db.update({ _id: id }, { movable });
-        if (result === false || result === 0) throw new Error("No commitment was updated");
+        const updated = await this.db.update({ _id: id }, { movable });
+        if (updated.length === 0) throw new Error("No commitment was updated");
     }
 }

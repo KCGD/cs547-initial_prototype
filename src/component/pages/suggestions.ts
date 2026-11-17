@@ -1,10 +1,10 @@
-import { ensure_commitmentdb, type Commitment_t } from "../../lib/db/db";
+import { ensure_commitmentdb, ensure_overridedb, type Commitment_t } from "../../lib/db/db";
 import type { LsDb } from "../../lib/db/lsdb";
 import { create_week_rating, week_rating_map } from "../../lib/planner/planner";
 import { semester_dates } from "../../const";
 import { Component } from "../component";
 import type { MainComponent } from "../main_component";
-import type { WeekViewData } from "./week_view";
+import { dispatchPlannerUpdate, type WeekViewData } from "./week_view";
 
 import "../../style/suggestions.css";
 
@@ -86,6 +86,7 @@ function comparisonBar(before: number, after: number, emphasizeAfter: boolean): 
 
 export class Suggestions extends Component {
     private db: LsDb<Commitment_t> = ensure_commitmentdb();
+    private overridedb = ensure_overridedb();
     header = "Suggested Moves";
 
     constructor(element: HTMLElement, parent: MainComponent) {
@@ -125,6 +126,7 @@ export class Suggestions extends Component {
 
         let selection: Selection | undefined;
         let commitments: SavedCommitment[] = [];
+        let ratingsByStart = new Map<string, number>();
         let suggestions: Suggestion[] = [];
         let pickFor: Suggestion | undefined;
         let loading = false;
@@ -163,6 +165,8 @@ export class Suggestions extends Component {
             const last = parseDate(semester.end)!;
             const firstSunday = sunday(first);
             const buckets = new Map<number, SavedCommitment[]>();
+            const effectiveScore = (start: number, events: readonly Commitment_t[]) =>
+                ratingsByStart.get(dateKey(start)) ?? scoreWeek(start, events);
 
             for (const event of commitments) {
                 const date = parseDate(event.date);
@@ -174,7 +178,7 @@ export class Suggestions extends Component {
             }
 
             const source = buckets.get(current.start) ?? [];
-            const before = scoreWeek(current.start, source);
+            const before = effectiveScore(current.start, source);
             const candidates = source.filter((event) => event.movable &&
                 event._id && !current.dismissed.has(event._id));
             const planned = new Map<number, SavedCommitment[]>();
@@ -207,7 +211,7 @@ export class Suggestions extends Component {
                             Math.max(first, start + dayOffset));
                         const date = dateKey(day);
                         const events = planned.get(start) ?? buckets.get(start) ?? [];
-                        const score = scoreWeek(start, [...events, { ...event, date }]);
+                        const score = effectiveScore(start, [...events, { ...event, date }]);
                         const distance = Math.abs(day - sourceDate);
                         if (score < bestScore || (score === bestScore && distance < bestDistance)) {
                             bestScore = score;
@@ -225,13 +229,13 @@ export class Suggestions extends Component {
                     event,
                     date: targetDate,
                     targetWeek,
-                    before: scoreWeek(targetWeek, targetEvents),
-                    after: scoreWeek(targetWeek, [...targetEvents, { ...event, date: targetDate }]),
+                    before: effectiveScore(targetWeek, targetEvents),
+                    after: effectiveScore(targetWeek, [...targetEvents, { ...event, date: targetDate }]),
                 });
             }
 
             const moving = new Set(suggestions.map(({ event }) => event._id));
-            const after = scoreWeek(current.start, source.filter((event) => !moving.has(event._id)));
+            const after = effectiveScore(current.start, source.filter((event) => !moving.has(event._id)));
             intro.textContent = suggestions.length > 0
                 ? `${current.label} is ${week_rating_map(before).toLowerCase()}. These flexible commitments could move:`
                 : "No moves suggested for this week.";
@@ -294,11 +298,11 @@ export class Suggestions extends Component {
                 for (const move of moves) {
                     const { _id, date } = move.event;
                     try {
-                        const result: unknown = await this.db.update(
+                        const updated = await this.db.update(
                             { _id, date, movable: true },
                             { date: move.date },
                         );
-                        if (result === false || result === 0) throw new Error("Commitment changed before saving");
+                        if (updated.length === 0) throw new Error("Commitment changed before saving");
                         savedDates.set(_id, move.date);
                         current.dates.delete(_id);
                     } catch (error) {
@@ -319,7 +323,7 @@ export class Suggestions extends Component {
                 }
                 if (savedDates.size > 0) {
                     try {
-                        await parent.disbatchUpdate();
+                        await dispatchPlannerUpdate(parent);
                     } catch (error) {
                         console.error("Could not refresh pages after moving commitments", error);
                         if (savedDates.size === moves.length) {
@@ -384,8 +388,16 @@ export class Suggestions extends Component {
             render();
 
             try {
-                const records = await this.db.find({});
-                if (request === revision) commitments = records as SavedCommitment[];
+                const [records, overrides] = await Promise.all([
+                    this.db.find({}),
+                    this.overridedb.find({}),
+                ]);
+                if (request === revision) {
+                    commitments = records;
+                    ratingsByStart = new Map(overrides.map(({ start_date, rating }) =>
+                        [start_date, rating] as const,
+                    ));
+                }
             } catch (error) {
                 if (request === revision) {
                     console.error("Could not load commitments", error);

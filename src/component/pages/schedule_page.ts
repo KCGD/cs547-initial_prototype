@@ -1,4 +1,4 @@
-import { ensure_commitmentdb, type Commitment_t } from "../../lib/db/db";
+import { ensure_commitmentdb, ensure_overridedb, type Commitment_t } from "../../lib/db/db";
 import type { LsDb } from "../../lib/db/lsdb";
 import { Component } from "../component";
 import type { MainComponent } from "../main_component";
@@ -7,6 +7,8 @@ import type { WeekViewData } from "./week_view";
 import "../../style/schedule.css";
 import { create_week_rating, week_rating_map } from "../../lib/planner/planner";
 import { semester_dates } from "../../const";
+
+import "../../style/schedule.css";
 
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
@@ -26,6 +28,7 @@ function weekStartOffset(label: string): number {
 
 export class SchedulePage extends Component {
     private db: LsDb<Commitment_t> = ensure_commitmentdb();
+    private overridedb = ensure_overridedb();
     header = "My Semester";
 
     constructor(element: HTMLElement, parent: MainComponent) {
@@ -82,8 +85,14 @@ export class SchedulePage extends Component {
             const version = ++updateVersion;
 
             try {
-                const commitments = await this.db.find({});
+                const [commitments, overrides] = await Promise.all([
+                    this.db.find({}),
+                    this.overridedb.find({}),
+                ]);
                 if (version !== updateVersion) return;
+                const ratingsByStart = new Map(overrides.map(({ start_date, rating }) =>
+                    [start_date, rating] as const,
+                ));
 
                 const start = semester_dates().start;
                 const weeks = commitments.length > 0
@@ -96,12 +105,14 @@ export class SchedulePage extends Component {
 
                 for (const [label, week] of weeks) {
                     const weekStart = weekOneSunday + weekStartOffset(label) * WEEK_MS;
+                    const startDate = new Date(weekStart).toISOString().slice(0, 10);
+                    const score = ratingsByStart.get(startDate) ?? week.rated;
                     const selection: WeekViewData = {
                         ...week,
                         label,
-                        startDate: new Date(weekStart).toISOString().slice(0, 10),
+                        startDate,
+                        rated: score,
                     };
-                    const score = week.rated;
                     const rating = week_rating_map(score);
                     if (rating === "HEAVY" && !firstHeavy) firstHeavy = selection;
 
