@@ -4,8 +4,9 @@ import "./style/header.css"
 import { createChild } from "./lib/dom/domUtil";
 import { Header } from "./component/header";
 import { HozMenu, type HozMenuOptions } from "./component/hozmenu";
-import { LsDb } from "./lib/db/lsdb";
 import { ensure_commitmentdb } from "./lib/db/db";
+import { MainComponent } from "./component/main_component";
+import { SchedulePage } from "./component/pages/schedule_page";
 
 async function Main() {
 	const db = ensure_commitmentdb();
@@ -25,8 +26,17 @@ async function Main() {
 
 	// init app
 	const header = new Header(createChild(APP, "header"), {"initialText": "My Semester", "initialBack": () => {alert("test")}});
-	const MAIN = createChild(APP, "main");
+
+	// create main component and attach pages
+	const MAIN = new MainComponent(createChild(APP, "main"), {
+		"schedule": SchedulePage
+	});
+	MAIN.setActive("schedule");
+
+	// create footer horizontal menu
 	const FOOTER = new HozMenu(createChild(APP, "footer"), FooterMenu);
+
+	console.log(db);
 }
 
 Main();

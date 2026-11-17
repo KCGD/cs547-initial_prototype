@@ -2,7 +2,7 @@ import { LsDb } from "./lsdb";
 
 const DB_COMMITMENT_COLLECTION = "commitments";
 
-type Commitment_t = {
+export type Commitment_t = {
     type: "Exam" | "Meeting";
     name: string;
     date: string;
