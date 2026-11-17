@@ -1,0 +1,106 @@
+.commitments-page {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.commitments-content {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    min-height: 100%;
+    max-width: 36rem;
+    margin-inline: auto;
+    padding: 16px 8px 24px;
+}
+
+.commitments-section + .commitments-section {
+    margin-top: 24px;
+}
+
+.commitments-section h2 {
+    margin: 0 0 4px;
+    color: var(--commitments-secondary, #555);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.commitments-section ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.commitments-section li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    border-bottom: 1px solid var(--commitments-divider, #aaa);
+}
+
+.commitments-name {
+    overflow-wrap: anywhere;
+}
+
+.commitments-detail,
+.commitments-hint,
+.commitments-status {
+    color: var(--commitments-secondary, #555);
+    font-size: 0.875rem;
+}
+
+.commitments-toggle {
+    min-width: 78px;
+    min-height: 32px;
+    padding: 3px 14px;
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.commitments-toggle[aria-pressed="false"] {
+    background: var(--commitments-fixed-bg, #d4d4d4);
+    font-weight: 700;
+}
+
+.commitments-toggle:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.commitments-hint,
+.commitments-status {
+    margin: 24px 0 0;
+    text-align: center;
+}
+
+.commitments-status:empty {
+    margin: 0;
+}
+
+.commitments-footer {
+    margin-top: auto;
+    padding-top: 36px;
+}
+
+.commitments-footer button {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 16px;
+    border: 2px solid currentColor;
+    border-radius: 10px;
+    background: var(--commitments-action-bg, #bdbdbd);
+    color: var(--commitments-action-text, #111);
+    font: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+}
