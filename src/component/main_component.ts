@@ -10,6 +10,7 @@ export class MainComponent extends Component {
     private page_components: Record<string, Component> = {};
     private global_menu_ref: HozMenu | undefined;
     private global_header_ref: Header | undefined;
+    private active_page_name: string | null = null;
     header = "Main";
 
     constructor(element:HTMLElement, page_constructors: PageRotation) {
@@ -44,6 +45,7 @@ export class MainComponent extends Component {
 
     public setHeaderReference(header:Header) {
         this.global_header_ref = header;
+        header.setParentReference(this);
     }
 
     public setActive(componentName: string, ...args:any) {
@@ -53,6 +55,10 @@ export class MainComponent extends Component {
                 `MainComponent > setActive: No registered component: ${componentName}`
             );
         }
+
+        // before switching, add current page ref to header backlog
+        if(this.active_page_name && this.global_header_ref) 
+            this.global_header_ref.pushBackRef(this.active_page_name);
 
         // disbatch update to component before rendering it
         this.page_components[componentName].update(...args);
@@ -70,6 +76,9 @@ export class MainComponent extends Component {
         // update header ref to page title
         if(this.global_header_ref)
             this.global_header_ref.setTitle(thispage.header);
+
+        // set current name
+        this.active_page_name = componentName;
     }
 
     /**

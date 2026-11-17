@@ -24,7 +24,6 @@ async function Main() {
 	const HEADER = new Header(createChild(APP, "header"), {"initialText": "My Semester", "initialBack": () => {alert("test")}});
 
 	// create main component and attach pages
-	
 	const MAIN = new MainComponent(createChild(APP, "main"), {
 		"schedule": SchedulePage,
 		"commitments": CommitmentPage,
