@@ -25,44 +25,6 @@ export class AddPage extends Component {
         super(element);
         this.element.classList.add("add-commitment");
 
-        if (!document.getElementById("add-commitment-meeting-styles")) {
-            const style = document.createElement("style");
-            style.id = "add-commitment-meeting-styles";
-            style.textContent = `
-                .add-commitment [hidden] {
-                    display: none;
-                }
-
-                .add-commitment .add-date-time {
-                    display: grid;
-                    grid-template-columns: minmax(0, 1fr);
-                    gap: 8px;
-                }
-
-                .add-commitment .is-meeting .add-date-time {
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                }
-
-                .add-commitment .add-date-time > .add-field {
-                    min-width: 0;
-                }
-
-                .add-commitment .add-field > select {
-                    box-sizing: border-box;
-                    width: 100%;
-                    min-width: 0;
-                    min-height: 44px;
-                    padding: 6px 10px;
-                    border: 2px solid currentColor;
-                    border-radius: 8px;
-                    background: transparent;
-                    color: inherit;
-                    font: inherit;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
         const form = document.createElement("form");
         form.noValidate = true;
         form.innerHTML = `
