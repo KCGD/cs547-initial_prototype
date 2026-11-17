@@ -6,9 +6,9 @@ import type { MainComponent } from "../main_component";
 import "../../style/schedule.css";
 
 export class SchedulePage extends Component {
-    private update: Function;
     private db: LsDb<Commitment_t> = ensure_commitmentdb();
     private parent:MainComponent;
+    header = "My Semester";
     
     private noCommitmentsScreen: HTMLElement;
 

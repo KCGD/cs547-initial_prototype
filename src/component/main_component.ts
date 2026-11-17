@@ -2,12 +2,15 @@ import { Component } from "./component";
 
 import "../style/maincomponent.css"
 import type { HozMenu } from "./hozmenu";
+import type { Header } from "./header";
 
 export type PageRotation = Record<string, PageComponentConstructor>;
 
 export class MainComponent extends Component {
     private page_components: Record<string, Component> = {};
     private global_menu_ref: HozMenu | undefined;
+    private global_header_ref: Header | undefined;
+    header = "Main";
 
     constructor(element:HTMLElement, page_constructors: PageRotation) {
         super(element);
@@ -39,8 +42,13 @@ export class MainComponent extends Component {
         this.global_menu_ref = menu;
     }
 
+    public setHeaderReference(header:Header) {
+        this.global_header_ref = header;
+    }
+
     public setActive(componentName: string) {
-        if (typeof this.page_components[componentName] === "undefined") {
+        let thispage = this.page_components[componentName];
+        if (typeof thispage === "undefined") {
             throw new Error(
                 `MainComponent > setActive: No registered component: ${componentName}`
             );
@@ -50,9 +58,17 @@ export class MainComponent extends Component {
             page.getElement().hidden = name !== componentName;
         }
 
-        if(this.global_menu_ref) {
-            console.log(`Menu ref: set ${componentName}`);
-            this.global_menu_ref.setActive(componentName);
+        if(this.global_menu_ref) this.global_menu_ref.setActive(componentName);
+
+        if(this.global_header_ref) this.global_header_ref.setTitle(thispage.header);
+    }
+
+    /**
+     * Updates all registered sub components and pages
+     */
+    public disbatchUpdate() {
+        for(const k of Object.keys(this.page_components)) {
+            this.page_components[k].update();
         }
     }
 }

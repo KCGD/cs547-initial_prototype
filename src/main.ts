@@ -20,19 +20,20 @@ async function Main() {
 	}
 
 	// init app
-	const header = new Header(createChild(APP, "header"), {"initialText": "My Semester", "initialBack": () => {alert("test")}});
+	const HEADER = new Header(createChild(APP, "header"), {"initialText": "My Semester", "initialBack": () => {alert("test")}});
 
 	// create main component and attach pages
+	
 	const MAIN = new MainComponent(createChild(APP, "main"), {
 		"schedule": SchedulePage,
 		"commitments": CommitmentPage,
 		"add": AddPage
 	});
-	MAIN.setActive("schedule");
 
 	// create footer horizontal menu
+	// "name" should match key of page in MAIN constructor
 	const FooterMenu:HozMenuOptions = [
-		{"name": "schedule", 	"icon": "/public/calendar_button.png", 		"text": "Schedule", 	"selected": true, 	"function": () => {MAIN.setActive("schedule")}},
+		{"name": "schedule", 	"icon": "/public/calendar_button.png", 		"text": "Schedule", 	"selected": true, 	"function": () => {MAIN.setActive("schedule");}},
 		{"name": "commitments", "icon": "/public/commitments_button.png", 	"text": "Commitments", 	"selected": false, 	"function": () => {MAIN.setActive("commitments")}},
 		{"name": "add", 		"icon": "/public/add_button.png", 			"text": "Add", 			"selected": false, 	"function": () => {MAIN.setActive("add")}}
 	];
@@ -40,8 +41,9 @@ async function Main() {
 
 	// add footer menu ref to main component so it updates on non-direct context switch
 	MAIN.setMenuReference(FOOTER);
+	MAIN.setHeaderReference(HEADER);
 
-	console.log(db);
+	MAIN.setActive("schedule");
 }
 
 Main();
