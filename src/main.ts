@@ -9,6 +9,7 @@ import { SchedulePage } from "./component/pages/schedule_page";
 import { CommitmentPage } from "./component/pages/commitments_page";
 import { AddPage } from "./component/pages/add_page";
 import { WeekViewPage } from "./component/pages/week_view";
+import { Suggestions } from "./component/pages/suggestions";
 
 async function Main() {
 	const APP = document.querySelector<HTMLDivElement>('#app');
@@ -27,7 +28,8 @@ async function Main() {
 		"add": AddPage,
 
 		// non-menu pages
-		"weekview": WeekViewPage
+		"weekview": WeekViewPage,
+		"suggested": Suggestions,
 	});
 
 	// create footer horizontal menu

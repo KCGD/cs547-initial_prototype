@@ -90,6 +90,7 @@ export class WeekViewPage extends Component {
 
         let currentWeek: WeekViewData | undefined;
         let saving = false;
+        let readRevision = 0;
 
         const setSaving = (pending: boolean) => {
             saving = pending;
@@ -130,7 +131,8 @@ export class WeekViewPage extends Component {
                             status.textContent = "Commitment saved. The week rating could not refresh.";
                         }
                     }
-                    await this.update();
+                    ++readRevision;
+                    render();
                 }
 
                 try {
@@ -144,11 +146,7 @@ export class WeekViewPage extends Component {
             }
         };
 
-        this.update = async (week?: WeekViewData) => {
-            if (week) {
-                currentWeek = week;
-                status.textContent = "";
-            }
+        const render = () => {
             if (!currentWeek) return;
 
             this.header = currentWeek.label ?? "Week View";
@@ -207,6 +205,40 @@ export class WeekViewPage extends Component {
             eventsList.replaceChildren(rows);
             setSaving(saving);
             content.hidden = false;
+        };
+
+        this.update = async (week?: WeekViewData) => {
+            const request = ++readRevision;
+            if (week) {
+                currentWeek = week;
+                status.textContent = "";
+                render();
+            }
+
+            const selected = currentWeek;
+            if (!selected) return;
+            const start = weekStart(selected);
+            if (start === undefined) return;
+
+            try {
+                const commitments = await this.db.find({});
+                if (request !== readRevision) return;
+
+                const events = commitments.filter((event) => {
+                    const date = Date.parse(`${event.date}T00:00:00Z`);
+                    return date >= start && date < start + 7 * DAY_MS;
+                });
+                const startDate = new Date(start).toISOString().slice(0, 10);
+                const rated = events.length > 0
+                    ? create_week_rating(events, startDate)["Week 1"]?.rated ?? selected.rated
+                    : 0;
+                currentWeek = { ...selected, startDate, events, rated };
+                render();
+            } catch (error) {
+                if (request !== readRevision) return;
+                console.error("Could not refresh week commitments", error);
+                status.textContent = "Couldn’t refresh this week.";
+            }
         };
 
         suggested.addEventListener("click", () => {
