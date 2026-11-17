@@ -41,10 +41,11 @@ export class HozMenu extends Component {
             el.classList.toggle(CLASS_SELECTED, item.selected);
 
             // assign element click function
+            // same as "setactive" but with function call
             el.addEventListener('click', (ev) => {
-                for(const n of this.menu) {
+                for(const n of this.menu) 
                     if (n.name !== item.name) this.elements[n.name].classList.remove(CLASS_SELECTED);
-                }
+
                 this.elements[item.name].classList.add(CLASS_SELECTED);
                 item.function.call(el, ev);
             });
@@ -55,7 +56,13 @@ export class HozMenu extends Component {
         }
     }
 
-    public setSelected(name:string) {
-        if(typeof this.elements[name] === "undefined") throw new Error(`hozmenu > setSelected: no element with name: ${name}`);
+    /**
+     * Cosmetic "set active" without function call
+     */
+    public setActive(name:string) {
+        for(const n of this.menu) {
+            if (n.name !== name) this.elements[n.name].classList.remove(CLASS_SELECTED);
+        }
+        this.elements[name].classList.add(CLASS_SELECTED);
     }
 }

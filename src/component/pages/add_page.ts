@@ -11,7 +11,7 @@ export class AddPage extends Component {
 
         super(element);
         this.update = async() => {
-            this.placeholder.innerText = JSON.stringify(await this.db.find({}));
+            this.placeholder.innerText = "Add page";
         }
 
         // placeholder

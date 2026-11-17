@@ -1,11 +1,13 @@
 import { Component } from "./component";
 
 import "../style/maincomponent.css"
+import type { HozMenu } from "./hozmenu";
 
 export type PageRotation = Record<string, PageComponentConstructor>;
 
 export class MainComponent extends Component {
     private page_components: Record<string, Component> = {};
+    private global_menu_ref: HozMenu | undefined;
 
     constructor(element:HTMLElement, page_constructors: PageRotation) {
         super(element);
@@ -33,6 +35,10 @@ export class MainComponent extends Component {
         }
     }
 
+    public setMenuReference(menu:HozMenu) {
+        this.global_menu_ref = menu;
+    }
+
     public setActive(componentName: string) {
         if (typeof this.page_components[componentName] === "undefined") {
             throw new Error(
@@ -42,6 +48,11 @@ export class MainComponent extends Component {
     
         for (const [name, page] of Object.entries(this.page_components)) {
             page.getElement().hidden = name !== componentName;
+        }
+
+        if(this.global_menu_ref) {
+            console.log(`Menu ref: set ${componentName}`);
+            this.global_menu_ref.setActive(componentName);
         }
     }
 }
