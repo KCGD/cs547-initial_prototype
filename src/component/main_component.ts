@@ -46,21 +46,30 @@ export class MainComponent extends Component {
         this.global_header_ref = header;
     }
 
-    public setActive(componentName: string) {
+    public setActive(componentName: string, ...args:any) {
         let thispage = this.page_components[componentName];
         if (typeof thispage === "undefined") {
             throw new Error(
                 `MainComponent > setActive: No registered component: ${componentName}`
             );
         }
+
+        // disbatch update to component before rendering it
+        this.page_components[componentName].update(...args);
     
+        // hide all non-selected page components
         for (const [name, page] of Object.entries(this.page_components)) {
             page.getElement().hidden = name !== componentName;
         }
 
-        if(this.global_menu_ref) this.global_menu_ref.setActive(componentName);
+        // update global menu ref if it has an option matching the component name
+        if(this.global_menu_ref) 
+            if(this.global_menu_ref.hasOption(componentName)) 
+                this.global_menu_ref.setActive(componentName);
 
-        if(this.global_header_ref) this.global_header_ref.setTitle(thispage.header);
+        // update header ref to page title
+        if(this.global_header_ref)
+            this.global_header_ref.setTitle(thispage.header);
     }
 
     /**

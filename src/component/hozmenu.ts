@@ -16,6 +16,7 @@ export type HozMenuOptions = Array<{
 export class HozMenu extends Component {
     private menu: HozMenuOptions;
     private elements: Record<string, HTMLElement> = {};
+    header="Footer Menu";
 
     constructor(element:HTMLElement, menu: HozMenuOptions) {
         super(element);
@@ -54,6 +55,10 @@ export class HozMenu extends Component {
             this.element.appendChild(el);
             this.elements[item.name] = el;
         }
+    }
+
+    public hasOption(name:string) {
+        return this.menu.filter((item)=>item.name === name).length > 0;
     }
 
     /**
