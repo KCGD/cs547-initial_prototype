@@ -1,0 +1,38 @@
+.hozmenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-top: 1px solid var(--border);
+}
+
+.hozmenu > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.hozmenu > .hozmenu-selected {
+    background-color: var(--menu-accent, #dce7ff);
+    color: var(--menu-accent-text, inherit);
+}
+
+.hozmenu > div > img,
+.hozmenu > div > p {
+    pointer-events: none;
+}
+
+.hozmenu > div > img {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.hozmenu > div > p {
+    margin: 0;
+}
