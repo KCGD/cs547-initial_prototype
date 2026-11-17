@@ -2,6 +2,7 @@ import { ensure_commitmentdb, type Commitment_t } from "../../lib/db/db";
 import type { LsDb } from "../../lib/db/lsdb";
 import { Component } from "../component";
 import type { MainComponent } from "../main_component";
+import type { WeekViewData } from "./week_view";
 
 import "../../style/schedule.css";
 import { create_week_rating, week_rating_map } from "../../lib/planner/planner";
@@ -91,12 +92,18 @@ export class SchedulePage extends Component {
                 const startDate = new Date(`${start}T00:00:00Z`);
                 const weekOneSunday = startDate.getTime() - startDate.getUTCDay() * DAY_MS;
                 const rows = document.createDocumentFragment();
-                let firstHeavy: (typeof weeks)[number] | undefined;
+                let firstHeavy: WeekViewData | undefined;
 
                 for (const [label, week] of weeks) {
+                    const weekStart = weekOneSunday + weekStartOffset(label) * WEEK_MS;
+                    const selection: WeekViewData = {
+                        ...week,
+                        label,
+                        startDate: new Date(weekStart).toISOString().slice(0, 10),
+                    };
                     const score = week.rated;
                     const rating = week_rating_map(score);
-                    if (rating === "HEAVY" && !firstHeavy) firstHeavy = [label, week];
+                    if (rating === "HEAVY" && !firstHeavy) firstHeavy = selection;
 
                     const row = document.createElement("li");
                     const button = document.createElement("button");
@@ -104,7 +111,7 @@ export class SchedulePage extends Component {
                     button.className = "schedule-week-row";
                     button.dataset.rating = rating;
                     button.style.setProperty("--week-score", String(Math.max(0, Math.min(100, score)) / 100));
-                    button.addEventListener("click", () => parent.setActive("weekview", week));
+                    button.addEventListener("click", () => parent.setActive("weekview", selection));
 
                     const heading = document.createElement("span");
                     heading.className = "schedule-week-heading";
@@ -112,9 +119,7 @@ export class SchedulePage extends Component {
                     title.textContent = label.replace(/\bweek\b/i, "Wk");
                     const date = document.createElement("span");
                     date.className = "schedule-week-date";
-                    date.textContent = weekDateFormat.format(
-                        weekOneSunday + weekStartOffset(label) * WEEK_MS,
-                    );
+                    date.textContent = weekDateFormat.format(weekStart);
                     heading.append(title, date);
 
                     const meter = document.createElement("span");
@@ -136,8 +141,8 @@ export class SchedulePage extends Component {
                 banner.hidden = !firstHeavy;
                 banner.onclick = null;
                 if (firstHeavy) {
-                    const [label, week] = firstHeavy;
-                    bannerText.textContent = `${label} is heavy!`;
+                    const week = firstHeavy;
+                    bannerText.textContent = `${week.label} is heavy!`;
                     banner.onclick = () => parent.setActive("weekview", week);
                 }
 
